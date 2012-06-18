@@ -12,11 +12,12 @@
 __global__ void clock_block(int kernel_time, int clockRate)
 { 
     int temp;
-    int max_clock = 2147483647;
+    int finish_clock;
     for(temp=0; temp<kernel_time; temp++){
-        clock_t finish_clock = clock()+clockRate;
-        if(finish_clock>max_clock) finish_clock=(max_clock*-1)+(finish_clock%max_clock);
-        while( clock() < finish_clock);
+        int start_time = clock();
+        finish_clock = start_time + clockRate;
+        bool wrapped = finish_clock < start_time;
+        while( clock() < finish_clock || wrapped) wrapped = clock()>0 && wrapped;
     }
 }
 
@@ -27,10 +28,9 @@ int main(int argc, char **argv)
     int kernel_time = 2500;        // time the kernel should run in ms
     int cuda_device = 0;
 
-    if(argc==2){
-        nkernels = atoi(argv[1]);
-        kernel_time = atoi(argv[2]);
-    }
+    //nkernels = atoi(argv[1]);       //could be used to pass in parameters
+    //kernel_time = atoi(argv[2]);
+
 
 
     cudaDeviceProp deviceProp;
