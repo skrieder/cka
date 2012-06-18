@@ -11,10 +11,10 @@
 // This is a kernel that does no real work but runs at least for a specified number of clocks
 __global__ void clock_block(int kernel_time, int clockRate)
 { 
-    int temp;
     int finish_clock;
-    for(temp=0; temp<kernel_time; temp++){
-        int start_time = clock();
+    int start_time;
+    for(int temp=0; temp<kernel_time; temp++){
+        start_time = clock();
         finish_clock = start_time + clockRate;
         bool wrapped = finish_clock < start_time;
         while( clock() < finish_clock || wrapped) wrapped = clock()>0 && wrapped;
@@ -28,9 +28,10 @@ int main(int argc, char **argv)
     int kernel_time = 2500;        // time the kernel should run in ms
     int cuda_device = 0;
 
-    //nkernels = atoi(argv[1]);       //could be used to pass in parameters
-    //kernel_time = atoi(argv[2]);
-
+    if( argc>2 ){
+        nkernels = atoi(argv[1]);       //could be used to pass in parameters
+        kernel_time = atoi(argv[2]);
+    }
 
 
     cudaDeviceProp deviceProp;
