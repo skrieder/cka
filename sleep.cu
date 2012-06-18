@@ -1,11 +1,13 @@
 #include <stdio.h>
 
 //This file will run nkernel many kernels concurrently and each
-//  of them will sleep for Kernel_time ms. This will work correctly
-//  until clock() ~ 2.15 billion clicks. On my system, where the GPU
-//  run at 1.56 GHz, this happens in 1.37 seconds.
-//Therefore this cannot be used to run tests that will call clock()
-//  after more than ~1.37 seconds.
+//  of them will sleep for kernel_time ms. These two numbers can
+//  be passed in as parameters, currently just list the two integers
+//  in the command line with nkernels first then kernel_time.
+
+//This file is intended to be used for measuring the overhead in creating
+//  kernels and using GPGPUs
+
 
 
 // This is a kernel that does no real work but runs at least for a specified number of clocks
@@ -23,9 +25,10 @@ __global__ void clock_block(int kernel_time, int clockRate)
 
 int main(int argc, char **argv)
 {
-    int nkernels = 4;              // number of concurrent kernels
-    int nstreams = nkernels + 1;   // use one more stream than concurrent kernel
-    int kernel_time = 2500;        // time the kernel should run in ms
+    //Default values
+    int nkernels = 16;              // number of concurrent kernels
+    int nstreams = nkernels + 1;    // use one more stream than concurrent kernel
+    int kernel_time = 2500;         // time the kernel should run in ms
     int cuda_device = 0;
 
     if( argc>2 ){
@@ -33,11 +36,11 @@ int main(int argc, char **argv)
         kernel_time = atoi(argv[2]);
     }
 
-
+    //Getting device information, because we need clock_rate later
     cudaDeviceProp deviceProp;
     cudaGetDevice(&cuda_device);	
-
     cudaGetDeviceProperties(&deviceProp, cuda_device);
+
 
     // allocate and initialize an array of stream handles
     cudaStream_t *streams = (cudaStream_t*) malloc(nstreams * sizeof(cudaStream_t));
