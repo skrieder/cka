@@ -15,7 +15,7 @@ __global__ void clock_block(int kernel_time, int clockRate)
     int max_clock = 2147483647;
     for(temp=0; temp<kernel_time; temp++){
         clock_t finish_clock = clock()+clockRate;
-        finish_clock = finish_clock%max_clock;
+        if(finish_clock>max_clock) finish_clock=(max_clock*-1)+(finish_clock%max_clock);
         while( clock() < finish_clock);
     }
 }
@@ -24,8 +24,14 @@ int main(int argc, char **argv)
 {
     int nkernels = 4;              // number of concurrent kernels
     int nstreams = nkernels + 1;   // use one more stream than concurrent kernel
-    int kernel_time = 2500;         // time the kernel should run in ms
+    int kernel_time = 2500;        // time the kernel should run in ms
     int cuda_device = 0;
+
+    if(argc==2){
+        nkernels = atoi(argv[1]);
+        kernel_time = atoi(argv[2]);
+    }
+
 
     cudaDeviceProp deviceProp;
     cudaGetDevice(&cuda_device);	
