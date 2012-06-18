@@ -12,17 +12,19 @@
 __global__ void clock_block(int kernel_time, int clockRate)
 { 
     int temp;
+    int max_clock = 2147483647;
     for(temp=0; temp<kernel_time; temp++){
         clock_t finish_clock = clock()+clockRate;
-        while( clock() < finish_clock );
+        finish_clock = finish_clock%max_clock;
+        while( clock() < finish_clock);
     }
 }
 
 int main(int argc, char **argv)
 {
-    int nkernels = 16;             // number of concurrent kernels
+    int nkernels = 4;              // number of concurrent kernels
     int nstreams = nkernels + 1;   // use one more stream than concurrent kernel
-    int kernel_time = 500;         // time the kernel should run in ms
+    int kernel_time = 2500;         // time the kernel should run in ms
     int cuda_device = 0;
 
     cudaDeviceProp deviceProp;
