@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     //I am starting this at i=1 because the default stream is 0.
     for( int i=1; i<nkernels+1; ++i)
     {
-        printf("starting kernel:  %d\n", i);
+        //printf("starting kernel:  %d\n", i);
         clock_block<<<1,1,1,streams[i]>>>(kernel_time, clockRate);
     }
 
@@ -62,13 +62,16 @@ int main(int argc, char **argv)
     cudaError cuda_error = cudaDeviceSynchronize();
 
     if(cuda_error==cudaSuccess){
-        printf( "  Running the concurrentKernels was a success\n");
+        //printf( "  Running the concurrentKernels was a success\n");
     }else{
-        if(cuda_error==cudaErrorLaunchTimeout ){
-            printf( "  A thread was stopped for reaching time limit\n" );
-        }else{
-            printf( "  An error happened while running the wait\n" );
-        }
+        printf("CUDA Error: %s\n", cudaGetErrorString(cuda_error));
+        
+        return 1;
+        //if(cuda_error==cudaErrorLaunchTimeout ){
+        //    printf( "  A thread was stopped for reaching time limit\n" );
+        //}else{
+        //    printf( "  An error happened while running the wait\n" );
+        //}
     }
 
     // release resources
